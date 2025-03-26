@@ -27,7 +27,7 @@
 
 :root {
     --font-mono: system, 'JetBrains Mono', ui-monospace, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-    --sidebar-width: 350px;
+    --sidebar-width: 300px;
     --header-size: 2.5rem;
     --h1-size: 1.75rem;
     --text-xs: 0.75rem;
@@ -196,6 +196,7 @@ li code {
 .sidebar {
     background-color: color-mix(in srgb, var(--background), black 15%);
     z-index: 10;
+    height: 100vh;
     transition: transform 0.3s ease-in-out;
     max-width: var(--sidebar-width);
     transform: translateX(0);
