@@ -3,6 +3,7 @@ import rehypeRaw from "rehype-raw";
 import rehypeStringify from "rehype-stringify";
 import remarkGfm from "remark-gfm";
 import remarkRehype from "remark-rehype";
+import rehypeMathjax from 'rehype-mathjax'
 import { rehypeAddCopyButton, remarkPreventImages } from "./remark";
 import remarkParse from "remark-parse";
 import matter from "gray-matter";
@@ -14,11 +15,8 @@ import { minify } from "html-minifier";
 import type { Config, FileNode, Metadata } from "./consts";
 import Handlebars from "handlebars";
 import { ensureDir } from "fs-extra";
-import remarkDirective from "remark-directive";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkMath from "remark-math";
-import rehypeSanitize from "rehype-sanitize";
-import rehypeFormat from "rehype-format";
 
 export const compilePage = async (
     filename: string,
@@ -124,18 +122,17 @@ export const processMarkdown = async (
 
         const htmlContent = await unified()
             .use(remarkParse)
-            .use(remarkDirective)
             .use(remarkFrontmatter)
             .use(remarkGfm)
             .use(remarkMath)
             .use(remarkRehype, { allowDangerousHtml: true })
             .use(rehypeRaw)
-            .use(rehypeSanitize)
+            .use(rehypeMathjax)
             .use(rehypePrism, { showLineNumbers: true, ignoreMissing: true })
             .use(rehypeAddCopyButton)
-            .use(rehypeFormat)
             .use(rehypeStringify)
             .process(content);
+
 
         const changedContent = await replaceObsidianEmbeds(htmlContent.toString(), hashPath);
         const newContent = changedContent.replace(/<p>/g, '<p class="paragraph-spacing">');
