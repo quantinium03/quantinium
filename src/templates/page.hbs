@@ -1,0 +1,25 @@
+<div class="markdown-content">
+    {{{content}}}
+</div>
+
+<!-- Aliases section -->
+{{#if aliases.length}}
+<div class="aliases mt-6">
+    <h3>Also known as:</h3>
+    <ul class="list-disc">
+        {{#each aliases}}
+        <li>{{this}}</li>
+        {{/each}}
+    </ul>
+</div>
+{{/if}}
+
+<!-- Creation/Modification info -->
+{{#if created}}
+<div class="creation-info">
+    <p><span class="font-medium">Created:</span> {{created}}</p>
+    {{#if modified}}
+    <p><span class="font-medium">Last modified:</span> {{modified}}</p>
+    {{/if}}
+</div>
+{{/if}}
