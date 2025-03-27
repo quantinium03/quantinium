@@ -31,7 +31,7 @@ export const compilePage = async (
         }
 
         const { content, frontmatter } = await processMarkdown(filepath, hashPath);
-        const html = await compileTemplate("page", frontmatter, content, file_tree.replaceAll("index.md", ""), config);
+        const html = await compileTemplate("page", frontmatter, content, file_tree.replaceAll("index.md", ""), config, filename);
 
         const relativePath = filepath.includes("content/")
             ? filepath.substring(filepath.indexOf("content/") + 8)
@@ -64,18 +64,20 @@ export const outputHTML = async (outputPath: string, html: string): Promise<void
     }
 };
 
-
 export const compileTemplate = async (
     templateName: string,
     metadata: Partial<Metadata>,
     content: string,
     file_tree: string,
     config: Config,
+    filename: string
 ): Promise<string> => {
     try {
+        const actualTemplateName = filename === 'index.md' ? 'index' : (templateName || 'page');
+
         const [pageTemplate, layoutTemplate] = await Promise.all([
-            readFile(`./src/templates/${templateName}.hbs`, "utf-8").catch(() => {
-                throw new Error(`Template ${templateName}.hbs not found`);
+            readFile(`./src/templates/${actualTemplateName}.hbs`, "utf-8").catch(() => {
+                throw new Error(`Template ${actualTemplateName}.hbs not found`);
             }),
             readFile(`./src/templates/layout.hbs`, "utf-8").catch(() => {
                 throw new Error(`Layout template not found`);
@@ -87,7 +89,10 @@ export const compileTemplate = async (
         });
 
         const pageCompiled = Handlebars.compile(pageTemplate);
-        const contentHTML = pageCompiled({ content });
+        const contentHTML = pageCompiled({
+            ...metadata,
+            content
+        });
 
         const layoutCompiled = Handlebars.compile(layoutTemplate);
         return layoutCompiled({
@@ -102,9 +107,10 @@ export const compileTemplate = async (
             created: metadata.created || "",
             modified: metadata.modified || "",
             content: contentHTML,
-            file_tree,
+            fileTree: file_tree,
             owner: config.owner,
             includesCopyButton: true,
+            profilePicturePath: config.profilePicturePath || "/assets/images/pfp.jpeg"
         });
     } catch (err) {
         console.error(`Error compiling template ${templateName}:`, err);
