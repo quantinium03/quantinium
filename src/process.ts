@@ -8,7 +8,7 @@ import remarkParse from "remark-parse";
 import matter from "gray-matter";
 import { unified } from "unified";
 import { readFile } from "fs/promises";
-import path from "path";
+import path, { extname } from "path";
 import { writeFile } from "fs/promises";
 import { minify } from "html-minifier";
 import type { Config, FileNode, Metadata } from "./consts";
@@ -16,6 +16,7 @@ import Handlebars from "handlebars";
 import { ensureDir } from "fs-extra";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkMath from "remark-math";
+import { visit } from "unist-util-visit";
 
 export const compilePage = async (
     filename: string,
@@ -29,8 +30,8 @@ export const compilePage = async (
             return;
         }
 
-        const { content, frontmatter } = await processMarkdown(filepath, hashPath);
-        const html = await compileTemplate("page", frontmatter, content, file_tree.replaceAll("index.md", ""), config, filename);
+        const { content, frontmatter, toc } = await processMarkdown(filepath, hashPath);
+        const html = await compileTemplate("page", frontmatter, content, file_tree.replaceAll("index.md", ""), config, filename, toc);
 
         const relativePath = filepath.includes("content/")
             ? filepath.substring(filepath.indexOf("content/") + 8)
@@ -69,7 +70,8 @@ export const compileTemplate = async (
     content: string,
     file_tree: string,
     config: Config,
-    filename: string
+    filename: string,
+    toc: string
 ): Promise<string> => {
     try {
         const actualTemplateName = filename === 'index.md' ? 'index' : (templateName || 'page');
@@ -109,7 +111,8 @@ export const compileTemplate = async (
             fileTree: file_tree,
             owner: config.owner,
             includesCopyButton: true,
-            profilePicturePath: config.profilePicturePath || "/assets/images/pfp.jpeg"
+            profilePicturePath: config.profilePicturePath || "/assets/images/pfp.jpeg",
+            tableOfContents: toc
         });
     } catch (err) {
         console.error(`Error compiling template ${templateName}:`, err);
@@ -120,37 +123,107 @@ export const compileTemplate = async (
 export const processMarkdown = async (
     filepath: string,
     hashPath: Map<string, string>
-): Promise<{ content: string; frontmatter: Partial<Metadata> }> => {
+): Promise<{ content: string; frontmatter: Partial<Metadata>, toc: string }> => {
     try {
         const mdContent = await readFile(filepath, "utf-8");
         const { content, data: frontmatter } = matter(mdContent);
-
-        const htmlContent = await unified()
+        const processor = unified()
             .use(remarkParse)
-            .use(remarkFrontmatter)
+            .use(remarkFrontmatter, ['yaml', 'toml'])
             .use(remarkGfm)
             .use(remarkMath)
-            .use(remarkRehype, { allowDangerousHtml: true })
+            .use(remarkRehype, { 
+                allowDangerousHtml: true,
+                handlers: {
+                    // Custom handlers if needed
+                }
+            })
             .use(rehypeRaw)
             .use(rehypeMathjax)
-            .use(rehypePrism, { showLineNumbers: true, ignoreMissing: true })
+            .use(rehypePrism, { 
+                showLineNumbers: true, 
+                ignoreMissing: true,
+                defaultLanguage: 'text'
+            })
             .use(rehypeStringify)
-            .process(content);
 
+        const parsed = processor.parse(content);
+        const processedContent = await processor.run(parsed);
+        
+        const TOC = generateToc(processedContent);
 
-        const changedContent = await replaceObsidianEmbeds(htmlContent.toString(), hashPath);
-        const newContent = changedContent.replace(/<p>/g, '<p class="paragraph-spacing">');
+        const htmlContent = processor.stringify(processedContent);
+        
+        const changedContent = await replaceObsidianEmbeds(
+            htmlContent.toString(), 
+            hashPath || new Map()
+        );
+
+        const newContent = changedContent.replace(/<p(?![\s\w-="'>])/g, '<p class="paragraph-spacing"');
 
         return {
             content: newContent,
             frontmatter: frontmatter as Partial<Metadata>,
+            toc: TOC,
         };
     } catch (err) {
-        throw new Error(`Failed to process markdown file ${filepath}: ${err}`);
+        // More detailed error logging
+        console.error(`Markdown Processing Error in ${filepath}:`, err);
+        throw new Error(`Failed to process markdown file ${filepath}: ${err instanceof Error ? err.message : String(err)}`);
     }
 };
 
-export const replaceObsidianEmbeds = async (content: string, hashPath: Map<string, string>): Promise<string> => {
+const generateToc = (tree: any): string => {
+    const toc: { text: string; id: string; level: number }[] = [];
+
+    visit(tree, "element", (node) => {
+        if (node.tagName && /^h[1-6]$/.test(node.tagName)) {
+            const level = parseInt(node.tagName[1], 10);
+            const text = node.children
+                .map((child: any) => (child.value || child.children?.[0]?.value || ""))
+                .join("")
+            const id = text.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+            toc.push({ text, id, level });
+            node.properties = node.properties || {};
+            node.properties.id = id;
+        }
+    })
+    return generateTocHtml(toc);
+}
+
+const generateTocHtml = (toc: { text: string; id: string; level: number }[]): string => {
+    if (!toc.length) return "";
+
+    let html = '<nav class="toc"><h2>Table of Contents</h2><ul>';
+    let currentLevel = 1;
+
+    for (let i = 0; i < toc.length; i++) {
+        const { text, id, level } = toc[i];
+        while (currentLevel > level) {
+            html += '</ul>';
+            currentLevel--;
+        }
+        while (currentLevel < level) {
+            html += '<ul>';
+            currentLevel++;
+        }
+
+        html += `<li class="toc-level-${level}"><a href="#${id}">${text}</a>`;
+        if (i + 1 < toc.length && toc[i + 1].level > level) {
+            continue;
+        }
+        html += '</li>';
+    }
+    while (currentLevel > 0) {
+        html += currentLevel === 1 ? '</ul>' : '</ul></li>';
+        currentLevel--;
+    }
+
+    html += '</nav>';
+    return html;
+};
+
+const replaceObsidianEmbeds = async (content: string, hashPath: Map<string, string>): Promise<string> => {
     if (!content) return '';
 
     const imageExtRegex = /\.(png|jpg|jpeg|ico|svg|webp|gif)$/i;
@@ -162,7 +235,7 @@ export const replaceObsidianEmbeds = async (content: string, hashPath: Map<strin
 
         if (imageExtRegex.test(fileName)) {
             const baseName = fileName.split('.')[0].replace(/ /g, "-");
-            return `<img src="/assets/images/${baseName}.jpeg" alt="${baseName}">`;
+            return `<img src="/assets/images/${baseName}${extname(fileName)}" alt="${baseName}">`;
         }
 
         return `![[${fileName}]]`;
