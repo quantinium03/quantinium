@@ -12,7 +12,7 @@
 
 .dark{
     --background: #1E1E2E;
-    --lightbackground: #11111B;
+    --lightbackground: #414559;
     --darktext: #7F849C;
     --Heading: #F9E2AF;
     --links-hover: #89DCEB;
@@ -50,7 +50,7 @@ body {
     font-family: var(--font-mono);
     background: var(--background);
     color: var(--text);
-    line-height: 1.6;
+    line-height: 1.5;
     min-height: 100vh;
 }
 
@@ -86,6 +86,74 @@ h5,
 h6 {
     margin: var(--spacing-unit) 0 calc(var(--spacing-unit) / 2);
     line-height: 1.2;
+}
+
+table,
+td,
+th {
+    border: 1px solid var(--lightbackground);
+}
+
+th {
+    font-size: var(--text-xl);
+}
+
+td {
+    padding: 0.5rem
+}
+
+li code {
+    background: var(--lightbackground);
+    padding: 0.1rem 0.5rem;
+    border-radius: var(--radius-lg);
+}
+
+ul {
+    list-style-type: disc;
+}
+
+ol {
+    list-style-type: decimal;
+}
+
+pre {
+    position: relative;
+    padding: 0.5rem;
+    margin: 1rem 0;
+    overflow: auto;
+}
+
+pre {
+    border: 1px solid var(--lightbackground);
+    border-radius: var(--radius-lg);
+}
+
+.code-block-wrapper {
+    position: relative;
+}
+
+.copy-button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    color: var(--text);
+    border: none;
+    border-radius: var(--radius-lg);
+    padding: 0.25rem 0.75rem;
+    font-size: var(--text-xs);
+    cursor: pointer;
+    transition: opacity 0.2s ease-in-out, background-color 0.2s ease-in-out;
+    z-index: 5;
+    background: var(--lightbackground);
+    border: 2px solid var(--text);
+}
+
+.page-content ul {
+    margin-left: 1rem;
+}
+
+.page-content ol {
+    margin-left: 1rem;
 }
 
 /* CLASSES */
@@ -154,7 +222,6 @@ h6 {
 }
 
 .file-tree li {
-    margin: 0.25rem 0;
     cursor: pointer;
     color: var(--text);
 }
@@ -208,6 +275,10 @@ h6 {
 
 .paragraph-spacing+.paragraph-spacing {
     margin-top: 1rem;
+}
+
+.owner a {
+    color: var(--Heading)
 }
 
 @media (max-width: 767px) {
@@ -448,11 +519,13 @@ pre[class*="language-"] {
     padding: 1em;
     margin: 0.5em 0;
     overflow: auto;
+    border: 1px solid var(--lightbackground);
 }
 
 :not(pre)>code[class*="language-"] {
     padding: 0.1em;
     border-radius: 0.3em;
+
 }
 
 .sidebar-inner h1 {
@@ -482,7 +555,8 @@ pre[class*="language-"] {
     border-bottom: 2px solid var(--lightbackground);
 }
 
-.search-button, .theme-toggle {
+.search-button,
+.theme-toggle {
     padding: 0.25rem;
     color: var(--text);
     background: var(--background);

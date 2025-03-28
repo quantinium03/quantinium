@@ -19,7 +19,7 @@
     <div class="container">
         <div class="sidebar">
             <div class="sidebar-inner">
-                <h1 class="owner">{{owner}}</h1>
+                <h1 class="owner"><a href="/">{{owner}}</a></h1>
                 <div class="sidebar-theme-toggle">
                     <button class="theme-toggle" onclick="toggleTheme(true)" aria-label="Toggle Theme">
                         <i class="ph ph-sun"></i>
@@ -66,6 +66,7 @@
                 console.error('Error parsing file tree:', error);
             }
             toggleTheme();
+            initializeCopyButton();
         })
 
         function initializeFileTree(fileTreeData) {
@@ -182,6 +183,32 @@
                 body.classList.remove('dark');
                 body.classList.add('light');
             }
+        }
+
+        function initializeCopyButton() {
+            const codeBlocks = document.querySelectorAll('.content-container-inner pre');
+            codeBlocks.forEach(block => {
+                const button = document.createElement('button');
+                button.textContent = 'Copy';
+                button.classList.add('copy-button');
+
+                button.addEventListener('click', () => {
+                    const code = block.querySelector('code')?.textContent || block.textContent;
+                    navigator.clipboard.writeText(code).then(() => {
+                        button.textContent = 'Copied!';
+                        setTimeout(() => {
+                            button.textContent = 'Copy';
+                        }, 2000);
+                    }).catch(err => {
+                        console.error('Failed to copy:', err);
+                        button.textContent = 'Error!';
+                        setTimeout(() => {
+                            button.textContent = 'Copy';
+                        }, 2000);
+                    });
+                });
+                block.appendChild(button);
+            });
         }
     </script>
 </body>

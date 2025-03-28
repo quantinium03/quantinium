@@ -4,7 +4,6 @@ import rehypeStringify from "rehype-stringify";
 import remarkGfm from "remark-gfm";
 import remarkRehype from "remark-rehype";
 import rehypeMathjax from 'rehype-mathjax'
-import { rehypeAddCopyButton, remarkPreventImages } from "./remark";
 import remarkParse from "remark-parse";
 import matter from "gray-matter";
 import { unified } from "unified";
@@ -135,7 +134,6 @@ export const processMarkdown = async (
             .use(rehypeRaw)
             .use(rehypeMathjax)
             .use(rehypePrism, { showLineNumbers: true, ignoreMissing: true })
-            .use(rehypeAddCopyButton)
             .use(rehypeStringify)
             .process(content);
 
