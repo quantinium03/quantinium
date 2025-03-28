@@ -25,7 +25,7 @@
 
 :root {
     --radius-lg: 0.5rem;
-    --sidebar-width: clamp(240px, 260vw, 280px);
+    --sidebar-width: clamp(300px, 22vw, 360px);
     --toc-width: clamp(200px, 220px, 240px);
     --page-width: clamp(700px, 80vw, 1000px);
     --font-size: 1.1em;
@@ -108,10 +108,10 @@ td {
     padding: 0.5rem;
 }
 
-li code {
-    background: var(--lightbackground);
+:not(pre)>code {
+    background-color: var(--lightbackground);
     padding: 0.1rem 0.5rem;
-    border-radius: var(--radius-lg);
+    border-radius: 0.3rem;
 }
 
 ul {
@@ -130,6 +130,7 @@ pre {
     border: 1px solid var(--lightbackground);
     border-radius: var(--radius-lg);
 }
+
 
 .code-block-wrapper {
     position: relative;
@@ -150,12 +151,19 @@ pre {
     background: var(--lightbackground);
 }
 
-.page-content ol {
+.page-content ol,
+.index-description ol {
     margin-left: 2rem;
 }
 
-.page-content ul {
-    margin-left: 1rem;
+.page-content ul,
+.index-description ul {
+    margin-left: 2rem;
+}
+
+.page-content,
+.index-content {
+    margin: 0 2rem;
 }
 
 /* CLASSES */
@@ -205,6 +213,7 @@ pre {
 
 .content-container-inner {
     width: 100%;
+    margin: 0 auto;
 }
 
 .container-right {
@@ -217,15 +226,16 @@ pre {
     margin-left: 2rem;
     border-radius: var(--radius-lg);
     margin: 0 auto;
+    width: var(--sidebar-width);
 }
 
 .container-right-inner {
     width: 100%;
 }
 
-.container-right .toc h2 {
+.table-of-content {
     font-size: 1.2rem;
-    color: #333;
+    color: var(--Heading);
     margin-bottom: 15px;
     padding-bottom: 10px;
     border-bottom: 1px solid #e0e0e0;
@@ -245,7 +255,7 @@ pre {
 
 .container-right .toc a {
     text-decoration: none;
-    color: #555;
+    color: var(--text);
     transition: color 0.2s ease;
     font-size: 0.9rem;
 }
@@ -321,6 +331,11 @@ pre {
     color: var(--text);
     font-weight: normal;
     padding-left: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
 }
 
 .file-tree li.file:hover {
@@ -390,8 +405,6 @@ pre {
     border-bottom: 2px solid var(--lightbackground);
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
-    align-content: center;
     margin-bottom: 1rem;
 }
 
@@ -413,6 +426,16 @@ pre {
     .content-container {
         max-width: 100%;
         padding: 0 calc(var(--spacing-unit) / 2);
+        margin: 0 auto;
+    }
+
+    .container-right {
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    .page-content,
+    .index-content {
         margin: 0 auto;
     }
 }
@@ -489,6 +512,7 @@ pre {
     .page-content h1 {
         font-size: var(--text-xl);
     }
+
 }
 
 @media (max-width: 480px) {

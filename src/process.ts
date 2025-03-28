@@ -194,7 +194,7 @@ const generateToc = (tree: any): string => {
 const generateTocHtml = (toc: { text: string; id: string; level: number }[]): string => {
     if (!toc.length) return "";
 
-    let html = '<nav class="toc"><h2>Table of Contents</h2><ul>';
+    let html = '<nav class="toc"><ul>';
     let currentLevel = 1;
 
     for (let i = 0; i < toc.length; i++) {
