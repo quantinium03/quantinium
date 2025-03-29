@@ -131,6 +131,12 @@ pre {
     border-radius: var(--radius-lg);
 }
 
+table {
+    display: block;
+    max-width: fit-content;
+    margin: 0 auto;
+    overflow-x: auto;
+}
 
 .code-block-wrapper {
     position: relative;
