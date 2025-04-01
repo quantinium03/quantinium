@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "clone": "bun run src/clone.ts",
-    "build": "bun run src/main.ts"
+    "build": "bun run src/build.ts",
+    "dev": "bun run serve dist"
   },
   "repository": {
     "type": "git",
@@ -42,6 +43,7 @@
     "@types/fluent-ffmpeg": "^2.1.27",
     "@types/html-minifier": "^4.0.5",
     "@types/sharp": "^0.32.0",
+    "canvas": "^3.1.0",
     "fluent-ffmpeg": "^2.1.3",
     "fuse.js": "^7.1.0",
     "glob": "^11.0.1",

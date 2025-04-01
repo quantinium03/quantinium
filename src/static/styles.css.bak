@@ -7,8 +7,7 @@
     --links: #1E66F5;
     --links-hover: #04A5E5;
     --text: #4C4F69;
-    --comment: #7C7F93;
-}
+    --comment: #7C7F93;}
 
 .dark{
     --background: #1E1E2E;
@@ -20,7 +19,6 @@
     --text: #CDD6F4;
     --comment: #9399B2;
 }
-
 @import url('https://fonts.googleapis.com/css2?family=Fira+Mono:wght@400;500;700&family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap');
 
 :root {
@@ -415,6 +413,7 @@ table {
 }
 
 .search-button,
+.pdf-button,
 .theme-toggle {
     padding: 0.25rem;
     color: var(--text);
@@ -519,6 +518,9 @@ table {
         font-size: var(--text-xl);
     }
 
+    .profile-banner {
+        display: none;
+    }
 }
 
 @media (max-width: 480px) {
@@ -661,3 +663,45 @@ pre[class*="language-"] {
     padding: 0.1em;
     border-radius: 0.3em;
 }
+
+
+
+.keybinding {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    border: 2px solid var(--lightbackground);
+    background-color: var(--background);
+    color: var(--text);
+    border-radius: var(--radius-lg);
+    padding: 10px;
+    z-index: 20;
+    max-width: 290px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.keybinding.hidden {
+    display: none;
+}
+
+.keybinding h3 {
+    margin-top: 0;
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.keybinding ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.keybinding li {
+    padding: 3px 0;
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--text-sm);
+    font-weight: bold;
+    list-style: disc;
+}
+
