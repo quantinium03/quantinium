@@ -128,7 +128,7 @@ const generateCSSFile = async (config: Config) => {
         .map(([name, value]) => `    --${name}: ${value};`)
         .join('\n');
 
-    css += "\n}\n";
+    css += "\n}\n\n";
 
     const precss: string = await readFile("./src/static/styles.css", "utf-8")
     const newcss = precss.split('\n').slice(22).join('\n')
