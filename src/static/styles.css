@@ -19,10 +19,6 @@
     --text: #CDD6F4;
     --comment: #9399B2;
 }
-
-:root {
-    --radius-lg: 0.5rem;
-    --sidebar-width: clamp(300px, 22vw, 360px);
     --toc-width: clamp(200px, 220px, 240px);
     --page-width: clamp(700px, 80vw, 1000px);
     --font-size: 1.1em;

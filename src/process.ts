@@ -170,8 +170,9 @@ const generateMetatags = async (metadata: Partial<Metadata>, config: Config, fil
 
     if (imageURL) {
         const absURL = `${config.baseURL}/static/${imageURL}`
-
         tags.push(`<meta property="og:image" content="${escapeHtml(absURL)}" />`);
+        tags.push(`<meta property="og:image:width" content="1200" />`);
+        tags.push(`<meta property="og:image:height" content="630" />`);
         tags.push(`<meta name="twitter:image" content="${escapeHtml(absURL)}" />`);
     }
 
