@@ -126,7 +126,6 @@ const outputHtml = async (outputPath: string, html: string): Promise<void> => {
 const generateMetatags = async (metadata: Partial<Metadata>, config: Config, filePath: string, content: string): Promise<string> => {
     const tags: string[] = [];
     const title = metadata.title || path.parse(basename(filePath)).name;
-    const description = metadata.description || (content.split('\n').splice(3).join(' ')) + '...';
 
     tags.push(`<meta property="og:site_name" content="${config.owner}" />`);
     tags.push(`<meta property="og:title" content="${escapeHtml(title)}" />`);
@@ -137,10 +136,10 @@ const generateMetatags = async (metadata: Partial<Metadata>, config: Config, fil
     tags.push(`<meta name="twitter:url" content="${config.baseURL}/${filePath}" />`);
     tags.push(`<meta name="generator" content="grimoire" />`);
 
-    if (description) {
-        tags.push(`<meta name="description" content="${description}" />`);
-        tags.push(`<meta property="og:description" content="${description}" />`);
-        tags.push(`<meta name="twitter:description" content="${description}" />`);
+    if (metadata.description) {
+        tags.push(`<meta name="description" content="${metadata.description}" />`);
+        tags.push(`<meta property="og:description" content="${metadata.description}" />`);
+        tags.push(`<meta name="twitter:description" content="${metadata.description}" />`);
     }
 
     if(config.baseURL) {
