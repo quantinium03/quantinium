@@ -1,4 +1,4 @@
-import type { Config, FileNode, Metadata, tableOfContentsEntry } from "./consts";
+import type { Config, FileNode, Metadata} from "./consts";
 import { ensureDir } from "fs-extra"
 import { readFile } from "fs/promises";
 import path, { basename, extname } from "path";
@@ -14,7 +14,6 @@ import Handlebars from "handlebars";
 import remarkMath from "remark-math";
 import { unified } from "unified";
 import { visit } from 'unist-util-visit';
-import type { Heading, Node, Text, Link, Delete, Emphasis, LinkReference, Strong } from 'mdast';
 import { createCanvas, loadImage } from "canvas";
 import { createWriteStream } from "fs";
 import { writeFile } from "fs/promises";
@@ -50,7 +49,7 @@ const compilePage = async (
         const inputPath = path.join(config.inputDir, node.path)
         const { content, frontMatter, tableOfContents } = await processMarkdown(inputPath, fileMap);
 
-        const metatags = await generateMetatags(frontMatter, config, node.path)
+        const metatags = await generateMetatags(frontMatter, config, node.path, content)
         const html = await compileTemplate(node, fileTree, frontMatter, content, tableOfContents, config, metatags)
 
         await outputHtml(path.join('dist', node.path.replace('.md', '.html')), html)
@@ -124,17 +123,28 @@ const outputHtml = async (outputPath: string, html: string): Promise<void> => {
     }
 }
 
-const generateMetatags = async (metadata: Partial<Metadata>, config: Config, filePath: string): Promise<string> => {
+const generateMetatags = async (metadata: Partial<Metadata>, config: Config, filePath: string, content: string): Promise<string> => {
     const tags: string[] = [];
-    const title = metadata.title || basename(filePath);
+    const title = metadata.title || path.parse(basename(filePath)).name;
+    const description = metadata.description || (content.split('\n').splice(3).join(' ')) + '...';
 
+    tags.push(`<meta property="og:site_name" content="${config.owner}" />`);
     tags.push(`<meta property="og:title" content="${escapeHtml(title)}" />`);
+    tags.push(`<meta property="og:type" content="website" />`);
+    tags.push(`<meta name="twitter:card" content="summary_large_image" />`);
     tags.push(`<meta name="twitter:title" content="${escapeHtml(title)}" />`);
+    tags.push(`<meta name="og:url" content="${config.baseURL}/${filePath}" />`);
+    tags.push(`<meta name="twitter:url" content="${config.baseURL}/${filePath}" />`);
+    tags.push(`<meta name="generator" content="grimoire" />`);
 
-    if (metadata.description) {
-        tags.push(`<meta name="description" content="${escapeHtml(metadata.description)}" />`);
-        tags.push(`<meta property="og:description" content="${escapeHtml(metadata.description)}" />`);
-        tags.push(`<meta name="twitter:description" content="${escapeHtml(metadata.description)}" />`);
+    if (description) {
+        tags.push(`<meta name="description" content="${description}" />`);
+        tags.push(`<meta property="og:description" content="${description}" />`);
+        tags.push(`<meta name="twitter:description" content="${description}" />`);
+    }
+
+    if(config.baseURL) {
+        tags.push(`<meta name="twitter:domain" content="${config.baseURL}" />`);
     }
 
     if (metadata.author) {
@@ -170,6 +180,9 @@ const generateMetatags = async (metadata: Partial<Metadata>, config: Config, fil
 
     if (imageURL) {
         const absURL = `${config.baseURL}/static/${imageURL}`
+        tags.push(`<meta property="og:image:type" content="image/png" />`);
+        tags.push(`<meta property="og:image:alt" content="${title}" />`);
+        tags.push(`<meta property="og:image:url" content="${escapeHtml(absURL)}" />`);
         tags.push(`<meta property="og:image" content="${escapeHtml(absURL)}" />`);
         tags.push(`<meta property="og:image:width" content="1200" />`);
         tags.push(`<meta property="og:image:height" content="630" />`);
@@ -395,7 +408,7 @@ const replaceObsidianEmbeds = async (content: string, hashPath: Map<string, stri
     });
 
 
-    result = result.replace(/==([^=]*)==/g, (match: string, group1: string) => {
+    result = result.replace(/==([^=]*)==/g, (_match: string, group1: string) => {
         return `<mark>${group1}</mark>`;
     });
     return result
